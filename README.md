@@ -6,12 +6,12 @@ This is a free lancing project where I made a dynamic website for managing inven
 
 ## Demo
 
-Here is a working demo of the website:- https://www.youtube.com/watch?v=MTikCHU2FL0&t=603s
+Here is a working demo of the website:- 
 
   
 ## Authors
 
-- [@sheturaj](https://github.com/ShetuRaj)
+
 
   
 ## Contributing
