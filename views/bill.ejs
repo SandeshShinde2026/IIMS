@@ -16,16 +16,17 @@
   <body>
     <!--Vertical Navbar-->
   <div class="vertical-nav bg-white" id="sidebar">
-    <div class="py-4 px-3 mb-4" style="background: linear-gradient(to top, #0066eb 0%, #ff8ab3 68%);">
-      <div class="media d-flex align-items-center"><img src="admin.svg" alt="..." width="65" class="mr-3 rounded-circle img-thumbnail shadow-sm">
+    <div class="py-4 px-3 mb-4" style="background: linear-gradient(135deg, #4a6da7, #2c4b81); border-bottom: 3px solid #1c3563;">
+      <div class="media d-flex align-items-center">
+        <img src="iism.png" alt="IIMS Logo" width="70" class="mr-3 rounded-circle img-thumbnail shadow-sm" style="border: 2px solid white; padding: 2px;">
         &emsp;<div class="media-body">
-          <h4 class="m-0"><p class="text-white"><shop-name></h4>
-            <p class="font-weight-light text-white mb-0">(Admin)</p>
+          <h4 class="m-0 text-light" style="font-weight: 600; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);"><shop-name></h4>
+          <p class="font-weight-light text-white mb-0" style="font-size: 0.85rem; opacity: 0.9;">Intelligent Inventory Management System<p>
         </div>
       </div>
     </div>
     <form action="/logout?_method=DELETE" method="POST">
-      <center><button type="submit" class="btn btn-danger" ><p class="text-white">Log Out</p></button></center>
+      <center><button type="submit" class="btn btn-danger"><p class="text-white">Log Out</p></button></center>
     </form>
     <h5 class="ui horizontal divider header text-primary">
       MAIN
@@ -34,34 +35,33 @@
     <ul class="nav flex-column bg-white mb-0">
       <li class="nav-item">
         <a href="/" class="nav-link text-dark font-italic">
-                  <i class="home icon"></i>
-                  Dashboard
-              </a>
+          <i class="home icon"></i>
+          Dashboard
+        </a>
       </li>
       <li class="nav-item">
-        <a href="/billing" class="nav-link text-dark font-italic" style="background: linear-gradient(to right, #0066eb 0%, #ff8ab3 68%);">
-          <p class="text-white"><i class="rupee sign icon"></i>
-                  Bill
-                  </p>
-              </a>
+        <a href="/billing" class="nav-link active">
+          <i class="rupee sign icon"></i>
+          Bill
+        </a>
       </li>
       <li class="nav-item">
         <a href="/orders" class="nav-link text-dark font-italic">
           <i class="eye icon"></i>
-                  View Orders
-              </a>
+          View Orders
+        </a>
       </li>
       <li class="nav-item">
         <a href="/viewstocks" class="nav-link text-dark font-italic">
           <i class="tags icon"></i>
-                  View Stocks
-              </a>
+          View Stocks
+        </a>
       </li>
       <li class="nav-item">
         <a href="/stocks" class="nav-link text-dark font-italic">
           <i class="plus circle icon"></i>
-                  Add Stock
-              </a>
+          Add Stock
+        </a>
       </li>
     </ul>
   
@@ -73,23 +73,23 @@
       <li class="nav-item">
         <a href="/brands" class="nav-link text-dark font-italic">
           <i class="yelp icon"></i>
-                  Brand
-              </a>
+          Brand
+        </a>
       </li>
       <li class="nav-item">
         <a href="/categories" class="nav-link text-dark font-italic">
           <i class="bookmark icon"></i>
-                  Category
-              </a>
+          Category
+        </a>
       </li>
       <li class="nav-item">
         <a href="/sizes" class="nav-link text-dark font-italic">
           <i class="check square icon"></i>
-                  Size
-              </a>
+          Size
+        </a>
       </li>
     </ul>
-
+  
     <h5 class="ui horizontal divider header text-primary">
       FILTERS
     </h5>
@@ -98,21 +98,47 @@
       <li class="nav-item">
         <a href="/sales_filter" class="nav-link text-dark font-italic">
           <i class="yelp icon"></i>
-                  Sales
-              </a>
+          Sales
+        </a>
       </li>
       <li class="nav-item">
         <a href="/stock_filter" class="nav-link text-dark font-italic">
           <i class="bookmark icon"></i>
-                  Stock
-              </a>
+          Stock
+        </a>
+      </li>
+    </ul>
+
+    <!-- Add AI Features section -->
+    <h5 class="ui horizontal divider header text-primary">
+      AI FEATURES
+    </h5>
+
+    <ul class="nav flex-column bg-white mb-0">
+      <li class="nav-item">
+        <a href="/sales-forecast" class="nav-link text-dark font-italic">
+          <i class="chart line icon"></i>
+          Sales Forecast
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/top-selling-prediction" class="nav-link text-dark">
+          <i class="trophy icon"></i>
+          Top Selling Items
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/inventory-optimization" class="nav-link text-dark font-italic">
+          <i class="box icon"></i>
+          Inventory Optimization
+        </a>
       </li>
     </ul>
   </div>
   <!-- End vertical navbar -->
   
      <!-- Page content holder -->
-  <div class="page-content p-5" id="content" style="background: linear-gradient(to right, #e9edf1 47%, #ff8ab3 100%);">
+  <div class="page-content p-5" id="content">
     <!-- Toggle button -->
     <button id="sidebarCollapse" type="button" class="btn btn-light bg-white rounded-pill shadow-sm px-4 mb-4"><i class="align justify icon"></i><small class="text-uppercase font-weight-bold">Menu</small></button>
   
@@ -124,9 +150,9 @@
     <br>
     <div class="ui fluid container">
     <form action="/submitbill" method="POST">
-    <table class="ui inverted pink celled table celled tbl_code_with_mark" id="myTable">
+    <table class="ui celled table tbl_code_with_mark" id="myTable">
       <thead>
-        <tr style="background: linear-gradient(to left, #0066eb 0%, #ff8ab3 68%);">
+        <tr class="bg-primary text-white">
           <th>Item No.</th>
           <th>Item ID</th>
           <th>Item Name</th>

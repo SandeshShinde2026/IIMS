@@ -1,250 +1,146 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;1,500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap");
 
-// $purple: #8a15ff;
-// $blue: #3800e7;
-// $ltblue: #15e0ff;
-// $magenta: #d000c5;
-
-// This is an example of animations & svgs... I completely understand that the amount of absolute positioning in this file is insane... ;) <3
+/* CSS Variables for consistent colors */
+:root {
+  --primary-color: #4a6da7;
+  --primary-light: #eef2f7;
+  --secondary-color: #6c757d;
+  --accent-color: #5d9cec;
+  --text-dark: #343a40;
+  --text-light: #f8f9fa;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+}
 
 body {
-  background: linear-gradient(#3800e7, #8a15ff);
+  background-color: var(--primary-light);
   height: 100vh;
-  font-size: calc(14px + (26 - 14) * ((100vw - 300px) / (1600 - 300)));
-  font-family: "DM Mono", monospace;
-  font-weight: 300;
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
   overflow: hidden;
-  color: white;
-  text-align: center;
+  color: var(--text-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
 }
 
 h1 {
-  font-size: 3em;
+  font-size: 2.5em;
   margin-bottom: 0.2em;
+  color: var(--primary-color);
 }
 
 h2 {
-  font-size: 2em;
+  font-size: 1.8em;
+  color: var(--secondary-color);
 }
 
-.main {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  flex-wrap: wrap;
-  position: relative;
-  justify-content: center;
-  align-items: center;
-
-  &:before,
-  &:after {
-    content: "";
-    display: block;
-    position: absolute;
-    z-index: -3;
-  }
-  &:before {
-    right: 0;
-    bottom: -19;
-    height: 30em;
-    width: 30em;
-    border-radius: 30em;
-    background: linear-gradient(#3800e7, #8a15ff);
-    align-self: flex-end;
-    animation: gradient-fade 8s ease-in-out 3s infinite alternate;
-  }
-  &:after {
-    $circle-unit: 10em;
-    top: 0;
-    left: 30;
-    height: $circle-unit;
-    width: $circle-unit;
-    border-radius: $circle-unit;
-    background: linear-gradient(#3800e7, #8a15ff);
-    animation: gradient-fade-alt 6s ease-in-out 3s infinite alternate;
-  }
-
-  &__text-wrapper {
-    position: relative;
-    padding: 2em;
-
-    &:before,
-    &:after {
-      content: "";
-      display: block;
-      position: absolute;
-    }
-
-    &:before {
-      $circle-unit: 13em;
-      z-index: -1;
-      top: -3em;
-      right: -3em;
-      width: $circle-unit;
-      height: $circle-unit;
-      opacity: 0.7;
-      border-radius: $circle-unit;
-      background: linear-gradient(#15e0ff, #8a15ff);
-      animation: rotation 7s linear infinite;
-    }
-
-    &:after {
-      $circle-unit: 20em;
-      z-index: -1;
-      bottom: -#{$circle-unit};
-      width: $circle-unit;
-      height: $circle-unit;
-      border-radius: $circle-unit;
-      background: linear-gradient(#d000c5, #8a15ff);
-      animation: rotation 7s linear infinite;
-    }
-  }
+.login-container {
+  width: 100%;
+  max-width: 420px;
+  padding: 20px;
+  text-align: center;
 }
 
-.arrow {
-  z-index: 1000;
-  opacity: 0.5;
-  position: absolute;
-
-  &--top {
-    top: 0;
-    left: -5em;
-  }
-
-  &--bottom {
-    bottom: 0;
-    right: 3em;
-  }
+.login-card {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px var(--shadow-color);
+  padding: 40px;
+  width: 100%;
 }
 
-.circle {
-  transform: translate(50%, -50%) rotate(0deg);
-  transform-origin: center;
-
-  &--ltblue {
-    $circle-unit: 20em;
-    height: $circle-unit;
-    width: $circle-unit;
-    border-radius: $circle-unit;
-    background: linear-gradient(#15e0ff, #3800e7);
-  }
+.logo-container {
+  margin-bottom: 30px;
 }
 
-.backdrop {
-  position: absolute;
-  width: 100vw;
-  height: 100vh;
+.logo {
+  max-width: 150px;
+  height: auto;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.form-label {
   display: block;
-  background-color: pink;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--text-dark);
 }
 
-.dotted-circle {
+.form-control {
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  padding: 12px 15px;
+  width: 100%;
+  font-size: 14px;
+  transition: border-color 0.3s;
+  box-sizing: border-box;
+}
+
+.form-control:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(74, 109, 167, 0.2);
+}
+
+.btn-login {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 12px 15px;
+  width: 100%;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 10px;
+}
+
+.btn-login:hover {
+  background-color: #3a5a8c;
+}
+
+.login-footer {
+  margin-top: 20px;
+  font-size: 14px;
+  color: var(--secondary-color);
+}
+
+.login-footer a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.login-footer a:hover {
+  text-decoration: underline;
+}
+
+/* Background elements */
+.decoration {
   position: absolute;
-  top: 0;
-  right: 0;
-  opacity: 0.3;
-  animation: rotation 38s linear infinite;
+  border-radius: 50%;
+  opacity: 0.05;
+  z-index: -1;
 }
 
-// animations
-.draw-in {
-  stroke-dasharray: 1000;
-  stroke-dashoffset: 10;
-  animation: draw 15s ease-in-out alternate infinite;
+.decoration-1 {
+  width: 300px;
+  height: 300px;
+  background-color: var(--primary-color);
+  top: -100px;
+  right: -100px;
 }
 
-@keyframes draw {
-  from {
-    stroke-dashoffset: 1000;
-  }
-
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-.item-to {
-  animation-duration: 10s;
-  animation-iteration-count: infinite;
-  transform-origin: bottom;
-}
-
-.bounce-1 {
-  animation-name: bounce-1;
-  animation-timing-function: ease;
-}
-
-.bounce-2 {
-  animation-name: bounce-2;
-  animation-timing-function: ease;
-}
-
-.bounce-3 {
-  animation-name: bounce-3;
-  animation-timing-function: ease;
-}
-
-@keyframes bounce-1 {
-  0% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(50px);
-  }
-  100% {
-    transform: translateY(0);
-  }
-}
-
-@keyframes bounce-2 {
-  0% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-30px);
-  }
-  100% {
-    transform: translateY(0);
-  }
-}
-
-@keyframes bounce-3 {
-  0% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(30px);
-  }
-  100% {
-    transform: translateY(0);
-  }
-}
-
-
-
-@keyframes rotation {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes gradient-fade {
-  from {
-    transform: translate(10%, -10%) rotate(0deg);
-  }
-  to {
-    transform: translate(50%, -50%) rotate(360deg);
-  }
-}
-
-@keyframes gradient-fade-alt {
-  from {
-    transform: translate(-20%, 20%) rotate(0deg);
-  }
-  to {
-    transform: translate(-60%, 60%) rotate(360deg);
-  }
+.decoration-2 {
+  width: 200px;
+  height: 200px;
+  background-color: var(--accent-color);
+  bottom: -50px;
+  left: -50px;
 }
