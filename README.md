@@ -30,6 +30,9 @@ You can let me know if you want to contribute to this project.
 - Sales Analysis
 - Stock Analysis
 - Generation of Bill in printable format
+- Sales Forecasting
+- Top Selling Items Prediction
+- Inventory Optimization 
 
 
   
