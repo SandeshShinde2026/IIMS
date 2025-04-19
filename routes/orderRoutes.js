@@ -11,7 +11,15 @@ router.post('/deleteorder', checkAuthenticated, orderController.deleteOrder);
 
 // Billing routes
 router.get('/bill', checkAuthenticated, orderController.showBilling);
+router.get('/billing', checkAuthenticated, orderController.showBilling); // Add route for /billing
 router.post('/bill', checkAuthenticated, [
+  check('customernumber')
+    .trim()
+    .notEmpty().withMessage('Customer number is required')
+    .isLength({ min: 10, max: 10 }).withMessage('Customer number must be 10 digits')
+    .matches(/^[0-9]+$/).withMessage('Customer number must contain only digits')
+], orderController.submitBill);
+router.post('/billing', checkAuthenticated, [
   check('customernumber')
     .trim()
     .notEmpty().withMessage('Customer number is required')
