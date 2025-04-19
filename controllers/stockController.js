@@ -32,6 +32,7 @@ exports.viewStocks = async (req, res) => {
     const sizes = await Size.getAll();
 
     res.render('viewstocks.ejs', {
+      all_stocks: stocks, // Renamed to match the variable name in the template
       stocks,
       brands,
       categories,
