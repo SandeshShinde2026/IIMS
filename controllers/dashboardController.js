@@ -8,19 +8,19 @@ exports.showDashboard = async (req, res) => {
     const totalStockCount = await Stock.getTotalCount();
     const stockByBrand = await Stock.getStatsByBrand();
     const stockByCategory = await Stock.getStatsByCategory();
-    
+
     // Get current month and year
     const now = new Date();
     const currentMonth = now.getMonth() + 1;
     const currentYear = now.getFullYear();
-    
+
     // Get sales statistics for current month
     const monthlySales = await Order.getTotalSalesByMonthYear(currentMonth, currentYear);
-    
+
     // Get top selling items
     const topSellingItems = await Order.getTopSellingItems(5);
-    
-    res.render('dashboard.ejs', {
+
+    res.render('index.ejs', {
       name: req.user.name,
       totalStockCount,
       stockByBrand,
@@ -33,7 +33,7 @@ exports.showDashboard = async (req, res) => {
   } catch (err) {
     console.error('Error loading dashboard:', err);
     req.flash('error', 'Failed to load dashboard data');
-    res.render('dashboard.ejs', {
+    res.render('index.ejs', {
       name: req.user.name,
       totalStockCount: 0,
       stockByBrand: [],
