@@ -52,7 +52,6 @@ app.use(bodyParser.json());
 
 // Security middleware
 app.use(helmet(helmetConfig));
-app.use(csrfProtection);
 app.use('/login', loginLimiter);
 app.use('/api', apiSecurityHeaders);
 
@@ -75,6 +74,9 @@ app.use(passport.session());
 
 // Flash messages
 app.use(flash());
+
+// CSRF protection (must be after session middleware)
+app.use(csrfProtection);
 
 // Method override for DELETE requests
 app.use(methodOverride('_method'));
