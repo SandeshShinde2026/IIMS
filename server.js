@@ -15,9 +15,27 @@ if (process.env.NODE_ENV !== 'production') {
   const { hashPassword, isPasswordHashed } = require('./utils/passwordUtils');
   const csrf = require('csurf');
   const rateLimit = require('express-rate-limit');
+  const helmet = require('helmet');
 
   const port = process.env.PORT || 3000;
   app.use(bodyparser.json());
+
+  // Setup security headers with helmet
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdn.jsdelivr.net", "https://code.jquery.com", "https://cdnjs.cloudflare.com"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com"],
+        imgSrc: ["'self'", "data:", "https://cdn.jsdelivr.net"],
+        connectSrc: ["'self'", "https://generativelanguage.googleapis.com"],
+        fontSrc: ["'self'", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com"],
+      },
+    },
+    xssFilter: true,
+    noSniff: true,
+    referrerPolicy: { policy: 'same-origin' }
+  }));
 
   // Setup CSRF protection
   const csrfProtection = csrf({ cookie: true });
