@@ -1,5 +1,5 @@
 const LocalStrategy = require('passport-local').Strategy
-const bcrypt = require('bcrypt')
+const { comparePassword, isPasswordHashed } = require('./utils/passwordUtils')
 
 function initialize(passport, getUserByEmail, getUserById) {
   const authenticateUser = async (email, password, done) => {
@@ -10,9 +10,9 @@ function initialize(passport, getUserByEmail, getUserById) {
 
     try {
       // Check if the password is already hashed
-      if (user.password.startsWith('$2b$') || user.password.startsWith('$2a$')) {
+      if (isPasswordHashed(user.password)) {
         // Use bcrypt to compare hashed password
-        const match = await bcrypt.compare(password, user.password);
+        const match = await comparePassword(password, user.password);
         if (match) {
           return done(null, user);
         } else {
