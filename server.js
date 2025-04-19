@@ -1,7 +1,7 @@
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config()
   }
-  
+
   const express = require('express');
   const { app, mysqlConnection } = require('./app');
   const bcrypt = require('bcrypt')
@@ -15,7 +15,7 @@ if (process.env.NODE_ENV !== 'production') {
 
   const port = process.env.PORT || 3000;
   app.use(bodyparser.json());
-  
+
   const users = []
 
     users.push({
@@ -24,16 +24,16 @@ if (process.env.NODE_ENV !== 'production') {
       email: process.env.login_id,
       password: process.env.login_password
     })
-  
+
 
   const initializePassport = require('./passport-config')
   initializePassport(
-    
+
     passport,
     email => users.find(user => user.email === email),
     id => users.find(user => user.id === id)
   )
-  
+
   // Only set view engine and static files here
   app.use(express.static("public"))
   app.set('view engine', 'ejs')
@@ -47,10 +47,10 @@ if (process.env.NODE_ENV !== 'production') {
   app.use(passport.initialize())
   app.use(passport.session())
   app.use(methodOverride('_method'))
-  
+
   // Initialize AI features
   // const ai = aiModule.initAI(app, mysqlConnection); // Removed duplicate initialization since it's done in app.js
-  
+
   app.get('/dashboard', checkAuthenticated, async (req, res) => {
     try {
       const [totalSales] = await mysqlConnection.promise().query('SELECT SUM(Amount) AS TotalItemsOrdered FROM ordersdb');
@@ -71,17 +71,17 @@ if (process.env.NODE_ENV !== 'production') {
       res.status(500).send('Database error');
     }
   });
-  
+
   app.get('/login', checkNotAuthenticated, (req, res) => {
     res.render('login.ejs')
   })
-  
+
   app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
     successRedirect: '/welcome',
     failureRedirect: '/login',
     failureFlash: true
   }))
-  
+
   app.get('/welcome', checkAuthenticated, (req, res) => {
     res.render('welcome.ejs');
   });
@@ -89,11 +89,11 @@ if (process.env.NODE_ENV !== 'production') {
   app.get('/', checkAuthenticated, (req, res) => {
     res.redirect('/dashboard');
   });
-  
+
   app.get('/register', checkNotAuthenticated, (req, res) => {
     res.render('register.ejs')
   })
-  
+
   app.post('/register', checkNotAuthenticated, async (req, res) => {
     try {
       const hashedPassword = await bcrypt.hash(req.body.password, 10)
@@ -109,27 +109,27 @@ if (process.env.NODE_ENV !== 'production') {
       res.redirect('/register')
     }
   })
-  
+
   app.delete('/logout', (req, res) => {
     req.logOut()
     res.redirect('/login')
   })
-  
+
   function checkAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
       return next()
     }
-  
+
     res.redirect('/login')
   }
-  
+
   function checkNotAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
       return res.redirect('/')
     }
     next()
   }
-  
+
   // AI Feature Routes
   // Sales Forecast page
   app.get('/sales-forecast', checkAuthenticated, (req, res) => {
@@ -140,13 +140,13 @@ if (process.env.NODE_ENV !== 'production') {
   app.get('/top-selling-prediction', checkAuthenticated, (req, res) => {
     // Get historical best-selling items
     const bestSellersQuery = `
-      SELECT 
+      SELECT
         ItemName,
         Brand,
         Category,
         COUNT(*) as totalSales,
         SUM(CAST(Amount AS DECIMAL(10,2))) as revenue
-      FROM ordersdb 
+      FROM ordersdb
       GROUP BY ItemName, Brand, Category
       ORDER BY totalSales DESC, revenue DESC
       LIMIT 10
@@ -206,21 +206,21 @@ if (process.env.NODE_ENV !== 'production') {
           const now = new Date();
           const daysAgo = Math.floor(Math.random() * 30);
           const orderDate = new Date(now.setDate(now.getDate() - daysAgo));
-          
+
           // Create transaction ID
           const transactionId = `TR${Date.now()}${index}`;
-          
+
           // Insert multiple entries based on quantity
           const promises = [];
-          
+
           for (let i = 0; i < order.quantity; i++) {
-            const query = `INSERT INTO ordersdb (TransactionID, ItemName, Brand, Category, Amount, Date) 
+            const query = `INSERT INTO ordersdb (TransactionID, ItemName, Brand, Category, Amount, Date)
                           VALUES (?, ?, ?, ?, ?, ?)`;
-            
+
             const promise = new Promise((innerResolve, innerReject) => {
               mysqlConnection.query(
-                query, 
-                [transactionId, order.ItemName, order.Brand, order.Category, order.Amount, orderDate], 
+                query,
+                [transactionId, order.ItemName, order.Brand, order.Category, order.Amount, orderDate],
                 (err) => {
                   if (err) {
                     console.error('Error inserting sample order:', err);
@@ -231,10 +231,10 @@ if (process.env.NODE_ENV !== 'production') {
                 }
               );
             });
-            
+
             promises.push(promise);
           }
-          
+
           Promise.all(promises)
             .then(() => {
               successCount += order.quantity;
@@ -249,7 +249,7 @@ if (process.env.NODE_ENV !== 'production') {
 
       // Insert all orders
       const insertPromises = sampleOrders.map((order, index) => insertOrder(order, index));
-      
+
       Promise.all(insertPromises)
         .then(() => {
           res.redirect('/top-selling-prediction?success=true&message=Successfully added sample data for top selling items prediction.');
@@ -297,17 +297,17 @@ if (process.env.NODE_ENV !== 'production') {
 
         // Format date as DD/MM/YYYY
         const formattedDate = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
-        
+
         // Generate orders for this day
         for (let j = 0; j < numOrders; j++) {
           const transactionId = 'TR' + Date.now().toString().slice(-6) + Math.random().toString(36).slice(-4);
           const numItems = Math.floor(Math.random() * 3) + 1; // 1-3 items per order
-          
+
           for (let k = 0; k < numItems; k++) {
             const product = sampleProducts[Math.floor(Math.random() * sampleProducts.length)];
             const quantity = Math.floor(Math.random() * 3) + 1; // 1-3 quantity per item
             const amount = product.basePrice * quantity;
-            
+
             // Add validation
             if (isNaN(amount)) {
                 console.error('Invalid amount calculated:', {
@@ -316,10 +316,10 @@ if (process.env.NODE_ENV !== 'production') {
                 });
                 continue;
             }
-            
+
             // Generate unique ItemID by combining product id with timestamp and random string
             const uniqueItemId = `${product.id}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
-            
+
             const order = {
               ItemID: uniqueItemId, // Use the unique ItemID instead of product.id
               ItemName: product.ItemName,
@@ -335,7 +335,7 @@ if (process.env.NODE_ENV !== 'production') {
               TYear: date.getFullYear(),
               TDay: date.getDate()
             };
-            
+
             orders.push(order);
           }
         }
@@ -348,7 +348,7 @@ if (process.env.NODE_ENV !== 'production') {
         const values = batch.map(order => [
           order.ItemID,
           order.ItemName,
-          order.Category, 
+          order.Category,
           order.Brand,
           order.Size,
           order.Amount,
@@ -403,10 +403,10 @@ app.get('/orders', checkAuthenticated, async (req, res) => {
     const [orders] = await mysqlConnection.promise().query(
       'SELECT * FROM ordersdb ORDER BY TransactionDate DESC, TransactionTime DESC'
     );
-    
+
     // Get transaction IDs from orders
     const transactionIds = orders.map(order => order.TransactionID);
-    
+
     // Get sub-orders if there are any transactions
     let sub_orders = [];
     if (transactionIds.length > 0) {
@@ -447,7 +447,7 @@ app.post('/orders_query', checkAuthenticated, async (req, res) => {
     if (time_type === 'month') {
       const month = req.body.selected_month;
       const year = req.body.selected_year;
-      
+
       if (!month || !year) {
         return res.render('orders.ejs', {
           orders: [],
@@ -461,16 +461,16 @@ app.post('/orders_query', checkAuthenticated, async (req, res) => {
 
       sql = `SELECT * FROM ordersdb WHERE TMonth = ? AND TYear = ? ORDER BY TransactionDate, TransactionTime`;
       params = [month, year];
-      
-      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                          'July', 'August', 'September', 'October', 'November', 'December'];
       const month_name = monthNames[month - 1];
 
       const [orders] = await mysqlConnection.promise().query(sql, params);
-      
+
       // Get transaction IDs from orders
       const transactionIds = orders.map(order => order.TransactionID);
-      
+
       // Get sub-orders if there are any transactions
       let sub_orders = [];
       if (transactionIds.length > 0) {
@@ -492,7 +492,7 @@ app.post('/orders_query', checkAuthenticated, async (req, res) => {
 
     } else if (time_type === 'year') {
       const year = req.body.selected_year;
-      
+
       if (!year) {
         return res.render('orders.ejs', {
           orders: [],
@@ -508,10 +508,10 @@ app.post('/orders_query', checkAuthenticated, async (req, res) => {
       params = [year];
 
       const [orders] = await mysqlConnection.promise().query(sql, params);
-      
+
       // Get transaction IDs from orders
       const transactionIds = orders.map(order => order.TransactionID);
-      
+
       // Get sub-orders if there are any transactions
       let sub_orders = [];
       if (transactionIds.length > 0) {
@@ -645,7 +645,7 @@ app.post('/stocks_query', checkAuthenticated, async (req, res) => {
   //Billing
   app.get('/billing',checkAuthenticated, (req, res) => {
     let sql1 = 'SELECT * FROM categorydb'
-    
+
     let query1 = mysqlConnection.query(sql1, (err1, rows1, fields1)=>{
       if(!err1)
       {
@@ -677,7 +677,7 @@ app.post('/stocks_query', checkAuthenticated, async (req, res) => {
       else
       console.log(err1)
 
-    
+
   })
 
 })
@@ -743,16 +743,16 @@ app.post('/addsize', checkAuthenticated, (req, res) => {
   let sql, params;
   if (time_type === 'month') {
     // For month filtering, get orders from that specific month and year
-    sql = `SELECT TransactionID, SUM(Amount) as Amount, TransactionDate, TransactionTime 
-           FROM ordersdb 
-           WHERE TMonth = ? AND TYear = ? 
+    sql = `SELECT TransactionID, SUM(Amount) as Amount, TransactionDate, TransactionTime
+           FROM ordersdb
+           WHERE TMonth = ? AND TYear = ?
            GROUP BY TransactionID, TransactionDate, TransactionTime`;
     params = [month, year];
   } else if (time_type === 'year') {
     // For year filtering, get orders from that specific year
-    sql = `SELECT TransactionID, SUM(Amount) as Amount, TransactionDate, TransactionTime 
-           FROM ordersdb 
-           WHERE TYear = ? 
+    sql = `SELECT TransactionID, SUM(Amount) as Amount, TransactionDate, TransactionTime
+           FROM ordersdb
+           WHERE TYear = ?
            GROUP BY TransactionID, TransactionDate, TransactionTime`;
     params = [year];
   }
@@ -763,17 +763,17 @@ app.post('/addsize', checkAuthenticated, (req, res) => {
   mysqlConnection.query(sql, params, (err, rows, fields) => {
     if(!err) {
       console.log(`Found ${rows.length} orders matching the filter criteria`);
-      
+
       // Get transaction IDs from filtered results for sub-query
       const transactionIds = rows.map(row => row.TransactionID);
-      
+
       if (transactionIds.length > 0) {
         // Only get sub-orders for the filtered transactions
         let sql1 = 'SELECT * FROM ordersdb WHERE TransactionID IN (?)';
         mysqlConnection.query(sql1, [transactionIds], (err1, rows1, fields1) => {
           if(!err1) {
             console.log(`Found ${rows1.length} order details for the sub-orders view`);
-            
+
             // Render the orders page with the filtered results
             res.render('orders.ejs', {
               orders: rows,
@@ -839,7 +839,7 @@ app.get('/sales_filter', checkAuthenticated, async (req, res) => {
           let query1 = mysqlConnection.query(sql1, (err1, rows1, fields1) => {
             if(!err1)
             {
-              res.render('stock_filter.ejs',{filter_type: filter_type,display_content: rows, total_items:rows1}) 
+              res.render('stock_filter.ejs',{filter_type: filter_type,display_content: rows, total_items:rows1})
             }
             else
             console.log(err1)
@@ -858,7 +858,7 @@ app.get('/sales_filter', checkAuthenticated, async (req, res) => {
           let query1 = mysqlConnection.query(sql1, (err1, rows1, fields1) => {
             if(!err1)
             {
-              res.render('stock_filter.ejs',{filter_type: filter_type,display_content: rows, total_items:rows1}) 
+              res.render('stock_filter.ejs',{filter_type: filter_type,display_content: rows, total_items:rows1})
             }
             else
             console.log(err1)
@@ -893,38 +893,38 @@ app.get('/sales_filter', checkAuthenticated, async (req, res) => {
       const monthNames = ["January", "February", "March", "April", "May", "June",
       "July", "August", "September", "October", "November", "December"];
     var month_name = monthNames[parseInt(month-1)];
-    
+
     let sql, params;
-    
+
     if (filter_type == 'all') {
-      sql = `SELECT TransactionDate, COUNT(*) as Count, SUM(Amount) as Amount 
-             FROM ordersdb 
-             WHERE TMonth = ? AND TYear = ? 
-             GROUP BY TransactionDate 
+      sql = `SELECT TransactionDate, COUNT(*) as Count, SUM(Amount) as Amount
+             FROM ordersdb
+             WHERE TMonth = ? AND TYear = ?
+             GROUP BY TransactionDate
              ORDER BY TransactionDate`;
       params = [month, year];
     } else if (filter_type == 'brand') {
-      sql = `SELECT Brand, COUNT(*) as Count, SUM(Amount) as Amount 
-             FROM ordersdb 
-             WHERE TMonth = ? AND TYear = ? 
-             GROUP BY Brand 
+      sql = `SELECT Brand, COUNT(*) as Count, SUM(Amount) as Amount
+             FROM ordersdb
+             WHERE TMonth = ? AND TYear = ?
+             GROUP BY Brand
              ORDER BY Amount DESC`;
       params = [month, year];
     } else if (filter_type == 'category') {
-      sql = `SELECT Category, COUNT(*) as Count, SUM(Amount) as Amount 
-             FROM ordersdb 
-             WHERE TMonth = ? AND TYear = ? 
-             GROUP BY Category 
+      sql = `SELECT Category, COUNT(*) as Count, SUM(Amount) as Amount
+             FROM ordersdb
+             WHERE TMonth = ? AND TYear = ?
+             GROUP BY Category
              ORDER BY Amount DESC`;
       params = [month, year];
     }
 
     mysqlConnection.query(sql, params, (err, rows, fields) => {
       if (!err) {
-        let sql1 = `SELECT SUM(Amount) as Amount, COUNT(*) as Count 
-                   FROM ordersdb 
+        let sql1 = `SELECT SUM(Amount) as Amount, COUNT(*) as Count
+                   FROM ordersdb
                    WHERE TMonth = ? AND TYear = ?`;
-        
+
         mysqlConnection.query(sql1, params, (err1, rows1, fields1) => {
           if (!err1) {
             console.log("Rendering results:", {
@@ -932,7 +932,7 @@ app.get('/sales_filter', checkAuthenticated, async (req, res) => {
               rows_count: rows.length,
               total_amount: rows1
             });
-            
+
             res.render('sales_filter.ejs', {
               is_paramater_set: true,
               time_type: 'month',
@@ -961,36 +961,36 @@ app.get('/sales_filter', checkAuthenticated, async (req, res) => {
     }
 
     let sql, params;
-    
+
     if (filter_type == 'all') {
-      sql = `SELECT TMonth, COUNT(*) as Count, SUM(Amount) as Amount 
-             FROM ordersdb 
-             WHERE TYear = ? 
-             GROUP BY TMonth 
+      sql = `SELECT TMonth, COUNT(*) as Count, SUM(Amount) as Amount
+             FROM ordersdb
+             WHERE TYear = ?
+             GROUP BY TMonth
              ORDER BY TMonth`;
       params = [year];
     } else if (filter_type == 'brand') {
-      sql = `SELECT Brand, COUNT(*) as Count, SUM(Amount) as Amount 
-             FROM ordersdb 
-             WHERE TYear = ? 
-             GROUP BY Brand 
+      sql = `SELECT Brand, COUNT(*) as Count, SUM(Amount) as Amount
+             FROM ordersdb
+             WHERE TYear = ?
+             GROUP BY Brand
              ORDER BY Amount DESC`;
       params = [year];
     } else if (filter_type == 'category') {
-      sql = `SELECT Category, COUNT(*) as Count, SUM(Amount) as Amount 
-             FROM ordersdb 
-             WHERE TYear = ? 
-             GROUP BY Category 
+      sql = `SELECT Category, COUNT(*) as Count, SUM(Amount) as Amount
+             FROM ordersdb
+             WHERE TYear = ?
+             GROUP BY Category
              ORDER BY Amount DESC`;
       params = [year];
     }
 
     mysqlConnection.query(sql, params, (err, rows, fields) => {
       if (!err) {
-        let sql1 = `SELECT SUM(Amount) as Amount, COUNT(*) as Count 
-                   FROM ordersdb 
+        let sql1 = `SELECT SUM(Amount) as Amount, COUNT(*) as Count
+                   FROM ordersdb
                    WHERE TYear = ?`;
-        
+
         mysqlConnection.query(sql1, params, (err1, rows1, fields1) => {
           if (!err1) {
             console.log("Rendering results:", {
@@ -998,7 +998,7 @@ app.get('/sales_filter', checkAuthenticated, async (req, res) => {
               rows_count: rows.length,
               total_amount: rows1
             });
-            
+
             res.render('sales_filter.ejs', {
               is_paramater_set: true,
               time_type: 'year',
@@ -1066,7 +1066,7 @@ app.get('/sales_filter', checkAuthenticated, async (req, res) => {
   //View Stocks
 app.get('/stocks', checkAuthenticated, (req, res) => {
   let sql1 = 'SELECT * FROM categorydb';
-  
+
   let query1 = mysqlConnection.query(sql1, (err1, rows1, fields1) => {
     if(!err1) {
       const category = rows1;
@@ -1101,7 +1101,68 @@ app.get('/stocks', checkAuthenticated, (req, res) => {
 });
 
   //Submit Bill
-  app.post('/submitbill', checkAuthenticated,(req, res) => {
+  // Import express-validator at the top of the file
+  const { body, validationResult, check } = require('express-validator');
+
+  // Add validation middleware to submitbill route
+  app.post('/submitbill', [
+    // Validate that at least one item exists
+    check('itemid1').exists().withMessage('At least one item is required'),
+
+    // Validate item details dynamically
+    (req, res, next) => {
+      const itemKeys = Object.keys(req.body).filter(key => key.startsWith('itemid'));
+
+      // For each item, validate its properties
+      itemKeys.forEach(key => {
+        const index = key.replace('itemid', '');
+
+        // Validate item name
+        check(`itemname${index}`)
+          .notEmpty().withMessage(`Item name for item ${index} is required`)
+          .run(req);
+
+        // Validate amount as a number
+        check(`amount${index}`)
+          .notEmpty().withMessage(`Amount for item ${index} is required`)
+          .isNumeric().withMessage(`Amount for item ${index} must be a number`)
+          .run(req);
+
+        // Validate category
+        check(`category${index}`)
+          .notEmpty().withMessage(`Category for item ${index} is required`)
+          .run(req);
+
+        // Validate brand
+        check(`brand${index}`)
+          .notEmpty().withMessage(`Brand for item ${index} is required`)
+          .run(req);
+
+        // Validate size
+        check(`size${index}`)
+          .notEmpty().withMessage(`Size for item ${index} is required`)
+          .run(req);
+      });
+
+      next();
+    },
+
+    // Validate customer number
+    check('customernumber')
+      .notEmpty().withMessage('Customer number is required')
+      .isLength({ min: 10, max: 15 }).withMessage('Customer number should be between 10 and 15 digits')
+      .isNumeric().withMessage('Customer number should contain only digits'),
+  ],
+  checkAuthenticated, (req, res) => {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      // If there are validation errors, flash them and redirect back
+      req.flash('error', errors.array().map(err => err.msg).join(', '));
+      return res.redirect('/billing');
+    }
+
+    // Continue with the existing code
     console.log(`\nRequest body = `)
     console.log(req.body)
     var request1 = req.body
@@ -1127,7 +1188,7 @@ app.get('/stocks', checkAuthenticated, (req, res) => {
       else
       new_req[i] = request1[i]
       }
-      
+
       const data = Object.entries(new_req).reduce((carry, [key, value]) => {
           const [text] = key.split(/\d+/);
           const index = key.substring(text.length) - 1;
@@ -1144,7 +1205,7 @@ app.get('/stocks', checkAuthenticated, (req, res) => {
         data[i].push(date_format.getMonth() + 1)
         data[i].push(date_format.getFullYear())
        }
-      
+
     console.log(`\nINSERT Array = `)
     console.log(data)
     let sql = `INSERT INTO ordersdb(ItemID,ItemName,Category,Brand,Size,Amount,CustomerNumber,TransactionDate,TransactionTime,TransactionID,TDay,TMonth,TYear) VALUES ? `
@@ -1158,14 +1219,14 @@ app.get('/stocks', checkAuthenticated, (req, res) => {
           if(!err2)
           {
           console.log('Successfully deleted corresponding values from stockdb')
-          
+
           }
           else
           console.log(err2);
         });
       }
       res.redirect('/orders')
-      
+
       }
       else
       console.log(err);
@@ -1173,7 +1234,57 @@ app.get('/stocks', checkAuthenticated, (req, res) => {
   })
 
   //Submit Stock
-  app.post('/submitstock', checkAuthenticated,(req, res) => {
+  app.post('/submitstock', [
+    // Validate that at least one item exists
+    check('itemid1').exists().withMessage('At least one item is required'),
+
+    // Validate item details dynamically
+    (req, res, next) => {
+      const itemKeys = Object.keys(req.body).filter(key => key.startsWith('itemid'));
+
+      // For each item, validate its properties
+      itemKeys.forEach(key => {
+        const index = key.replace('itemid', '');
+
+        // Validate item name
+        check(`itemname${index}`)
+          .notEmpty().withMessage(`Item name for item ${index} is required`)
+          .run(req);
+
+        // Validate amount as a number
+        check(`amount${index}`)
+          .notEmpty().withMessage(`Amount for item ${index} is required`)
+          .isNumeric().withMessage(`Amount for item ${index} must be a number`)
+          .isFloat({ min: 0 }).withMessage(`Amount for item ${index} must be a positive number`)
+          .run(req);
+
+        // Validate category
+        check(`category${index}`)
+          .notEmpty().withMessage(`Category for item ${index} is required`)
+          .run(req);
+
+        // Validate brand
+        check(`brand${index}`)
+          .notEmpty().withMessage(`Brand for item ${index} is required`)
+          .run(req);
+
+        // Validate size
+        check(`size${index}`)
+          .notEmpty().withMessage(`Size for item ${index} is required`)
+          .run(req);
+      });
+
+      next();
+    },
+  ],
+  checkAuthenticated, (req, res) => {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      // If there are validation errors, flash them and redirect back
+      req.flash('error', errors.array().map(err => err.msg).join(', '));
+      return res.redirect('/stocks');
+    }
     console.log(req.body)
     var request1 = req.body
 
@@ -1190,7 +1301,7 @@ app.get('/stocks', checkAuthenticated, (req, res) => {
       else
       new_req[i] = request1[i]
       }
-      
+
       const data = Object.entries(new_req).reduce((carry, [key, value]) => {
           const [text] = key.split(/\d+/);
           const index = key.substring(text.length) - 1;
@@ -1206,7 +1317,7 @@ app.get('/stocks', checkAuthenticated, (req, res) => {
         data[i].push(date_format.getMonth() + 1)
         data[i].push(date_format.getFullYear())
        }
-      
+
 
     let sql = `INSERT INTO stockdb(ItemID,ItemName,Category,Brand,Size,Amount,StockDate,StockTime,TDay,TMonth,TYear) VALUES ? `
     let query = mysqlConnection.query(sql,[ data], (err, rows, fields)=>{
@@ -1230,7 +1341,7 @@ app.get('/stocks', checkAuthenticated, (req, res) => {
       {
       console.log('Successfully deleted a value')
       res.redirect('/orders')
-      
+
       }
       else
       console.log(err);
@@ -1247,7 +1358,7 @@ app.get('/stocks', checkAuthenticated, (req, res) => {
       {
       console.log('Successfully deleted a category')
       res.redirect('/categories')
-      
+
       }
       else
       console.log(err);
@@ -1275,7 +1386,7 @@ app.post('/deletesize', checkAuthenticated, (req, res) => {
   console.log('deletesize called');
   var deleteid = req.body.deleteid;
   let sql = 'DELETE FROM sizedb WHERE Size = ?';
-  
+
   mysqlConnection.query(sql, [deleteid], (err, rows, fields) => {
     if(!err) {
       console.log('Successfully deleted size:', deleteid);
@@ -1298,7 +1409,7 @@ app.post('/deletesize', checkAuthenticated, (req, res) => {
       {
       console.log('Successfully deleted a value')
       res.redirect('/viewstocks')
-      
+
       }
       else
       console.log(err);
@@ -1334,7 +1445,7 @@ app.get('/test-gemini', checkAuthenticated, async (req, res) => {
         ]
       }
     });
-    
+
     res.json({
       status: 'success',
       apiResponse: response.data
@@ -1360,7 +1471,7 @@ app.get('/list-models', checkAuthenticated, async (req, res) => {
         key: process.env.GEMINI_API_KEY.trim()
       }
     });
-    
+
     res.json({
       status: 'success',
       models: response.data
