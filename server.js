@@ -12,9 +12,28 @@ if (process.env.NODE_ENV !== 'production') {
   const bodyparser = require('body-parser');
   const dotenv = require('dotenv');
   const aiModule = require('./ai/index');
+  const { hashPassword, isPasswordHashed } = require('./utils/passwordUtils');
+  const csrf = require('csurf');
+  const rateLimit = require('express-rate-limit');
 
   const port = process.env.PORT || 3000;
   app.use(bodyparser.json());
+
+  // Setup CSRF protection
+  const csrfProtection = csrf({ cookie: true });
+  app.use(csrfProtection);
+
+  // Setup rate limiting
+  const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // limit each IP to 5 login attempts per windowMs
+    message: 'Too many login attempts from this IP, please try again after 15 minutes',
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  });
+
+  // Apply rate limiting to login route
+  app.use('/login', loginLimiter);
 
   const users = []
 
@@ -113,6 +132,45 @@ if (process.env.NODE_ENV !== 'production') {
   app.delete('/logout', (req, res) => {
     req.logOut()
     res.redirect('/login')
+  })
+
+  // Admin route to hash all plain-text passwords
+  app.get('/admin/hash-passwords', checkAuthenticated, async (req, res) => {
+    try {
+      // Only allow admin users to access this route
+      if (req.user.email !== process.env.login_id) {
+        req.flash('error', 'You do not have permission to access this page');
+        return res.redirect('/dashboard');
+      }
+
+      // Get all users with plain-text passwords
+      const [usersWithPlainTextPasswords] = await mysqlConnection.promise().query(
+        'SELECT * FROM users WHERE password NOT LIKE "$2b$%" AND password NOT LIKE "$2a$%"'
+      );
+
+      if (usersWithPlainTextPasswords.length === 0) {
+        req.flash('info', 'All passwords are already hashed');
+        return res.redirect('/dashboard');
+      }
+
+      // Hash each plain-text password
+      let updatedCount = 0;
+      for (const user of usersWithPlainTextPasswords) {
+        const hashedPassword = await hashPassword(user.password);
+        await mysqlConnection.promise().query(
+          'UPDATE users SET password = ? WHERE id = ?',
+          [hashedPassword, user.id]
+        );
+        updatedCount++;
+      }
+
+      req.flash('success', `Successfully hashed ${updatedCount} passwords`);
+      res.redirect('/dashboard');
+    } catch (error) {
+      console.error('Error hashing passwords:', error);
+      req.flash('error', 'An error occurred while hashing passwords');
+      res.redirect('/dashboard');
+    }
   })
 
   function checkAuthenticated(req, res, next) {
