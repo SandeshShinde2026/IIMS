@@ -9,14 +9,24 @@ function initialize(passport, getUserByEmail, getUserById) {
     }
 
     try {
-      if (password == user.password) {
-        return done(null, user)
+      // Check if the password is already hashed
+      if (user.password.startsWith('$2b$') || user.password.startsWith('$2a$')) {
+        // Use bcrypt to compare hashed password
+        const match = await bcrypt.compare(password, user.password);
+        if (match) {
+          return done(null, user);
+        } else {
+          return done(null, false, { message: 'Password incorrect' });
+        }
       } else {
-        console.log(`Username =${user}`)
-        console.log(`password =${password}`)
-        console.log(`user.password =${user.password}`)
-        
-        return done(null, false, { message: 'Password incorrect' })
+        // For backward compatibility with non-hashed passwords
+        // This should be temporary until all passwords are hashed
+        if (password === user.password) {
+          console.warn('WARNING: Using unhashed password for user:', user.email);
+          return done(null, user);
+        } else {
+          return done(null, false, { message: 'Password incorrect' });
+        }
       }
     } catch (e) {
       return done(e)
