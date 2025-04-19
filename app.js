@@ -27,6 +27,7 @@ const sizeRoutes = require('./routes/sizeRoutes');
 const stockRoutes = require('./routes/stockRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const forecastRoutes = require('./routes/forecastRoutes');
+const predictionRoutes = require('./routes/predictionRoutes');
 
 // Import passport config
 const initializePassport = require('./config/passport-config');
@@ -99,6 +100,7 @@ app.use('/', sizeRoutes);
 app.use('/', stockRoutes);
 app.use('/', orderRoutes);
 app.use('/', forecastRoutes);
+app.use('/', predictionRoutes);
 
 // Root route - redirect to login
 app.get('/', (req, res) => {
