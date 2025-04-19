@@ -28,7 +28,12 @@ exports.showDashboard = async (req, res) => {
       monthlySales: monthlySales || { Amount: 0, Count: 0 },
       topSellingItems,
       currentMonth,
-      currentYear
+      currentYear,
+      // Add missing variables needed by index.ejs
+      total_sales: [{ TotalItemsOrdered: monthlySales ? monthlySales.Amount : 0 }],
+      ord_num: [{ NumberOfProducts: monthlySales ? monthlySales.Count : 0 }],
+      stock_num: [{ NumberOfProducts: totalStockCount || 0 }],
+      total_stock: [{ TotalItemsOrdered: stockByBrand.reduce((sum, item) => sum + parseFloat(item.Amount || 0), 0) }]
     });
   } catch (err) {
     console.error('Error loading dashboard:', err);
@@ -41,7 +46,12 @@ exports.showDashboard = async (req, res) => {
       monthlySales: { Amount: 0, Count: 0 },
       topSellingItems: [],
       currentMonth: 0,
-      currentYear: 0
+      currentYear: 0,
+      // Add missing variables needed by index.ejs
+      total_sales: [{ TotalItemsOrdered: 0 }],
+      ord_num: [{ NumberOfProducts: 0 }],
+      stock_num: [{ NumberOfProducts: 0 }],
+      total_stock: [{ TotalItemsOrdered: 0 }]
     });
   }
 };
