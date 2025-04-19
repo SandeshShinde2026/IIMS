@@ -1,90 +1,114 @@
 const express = require('express');
-const app = express();
-const path = require('path');
-const mysql = require('mysql2');
-const bcrypt = require('bcrypt');
 const passport = require('passport');
 const flash = require('express-flash');
 const session = require('express-session');
 const methodOverride = require('method-override');
-const aiModule = require('./ai/index');
+const bodyParser = require('body-parser');
+const dotenv = require('dotenv');
+const helmet = require('helmet');
+const { check, validationResult } = require('express-validator');
 
-// Validate required environment variables
-const requiredEnvVars = ['db_user_name', 'db_password', 'db_name', 'SESSION_SECRET'];
-const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+// Load environment variables
+dotenv.config();
 
-if (missingEnvVars.length > 0) {
-  console.error('Missing required environment variables:', missingEnvVars.join(', '));
-  process.exit(1);
-}
+// Import middleware
+const { csrfProtection, loginLimiter, helmetConfig, apiSecurityHeaders } = require('./middleware/securityMiddleware');
 
-// Create the database connection
-const mysqlConnection = mysql.createConnection({
-  host: 'localhost',
-  user: process.env.db_user_name,
-  password: process.env.db_password,
-  database: process.env.db_name
-});
+// Import database connection
+const mysqlConnection = require('./config/database');
 
-// Connect to database
-mysqlConnection.connect((err) => {
-  if (!err) {
-    console.log('DB connection succeeded');
-  } else {
-    console.log('DB connection failed \n Error:', JSON.stringify(err, undefined, 2));
-    setTimeout(handleDisconnect, 2000);
-  }
-});
+// Import routes
+const authRoutes = require('./routes/authRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
+const brandRoutes = require('./routes/brandRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
+const sizeRoutes = require('./routes/sizeRoutes');
+const stockRoutes = require('./routes/stockRoutes');
+const orderRoutes = require('./routes/orderRoutes');
 
-// Handle disconnects
-function handleDisconnect() {
-  mysqlConnection.connect(err => {
-    if (err) {
-      console.error('Error connecting to MySQL:', err);
-      setTimeout(handleDisconnect, 2000);
-    } else {
-      console.log('Reconnected to MySQL database.');
-    }
-  });
+// Import passport config
+const initializePassport = require('./config/passport-config');
 
-  mysqlConnection.on('error', err => {
-    console.error('MySQL error:', err);
-    if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-      handleDisconnect();
-    } else {
-      throw err;
-    }
-  });
-}
+// Create Express app
+const app = express();
+
+// Initialize global users array (in a real app, this would be a database)
+global.users = [];
+
+// Initialize Passport
+initializePassport(
+  passport,
+  email => global.users.find(user => user.email === email),
+  id => global.users.find(user => user.id === id)
+);
+
+// Set view engine
+app.set('view engine', 'ejs');
 
 // Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(flash());
+app.use(express.static('public'));
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+// Security middleware
+app.use(helmet(helmetConfig));
+app.use(csrfProtection);
+app.use('/login', loginLimiter);
+app.use('/api', apiSecurityHeaders);
+
+// Session configuration
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true, // Prevents client-side JS from reading the cookie
+    secure: process.env.NODE_ENV === 'production', // Requires HTTPS in production
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: 'strict' // Prevents CSRF attacks
+  }
 }));
+
+// Passport middleware
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Flash messages
+app.use(flash());
+
+// Method override for DELETE requests
 app.use(methodOverride('_method'));
 
-// Make database connection available to routes
-app.locals.db = mysqlConnection;
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Something broke!' });
+// Add CSRF token to all views
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+  next();
 });
 
-app.get('/employees', (req,res) =>{
-  // ... code ...
-})
+// Routes
+app.use('/', authRoutes);
+app.use('/', dashboardRoutes);
+app.use('/', brandRoutes);
+app.use('/', categoryRoutes);
+app.use('/', sizeRoutes);
+app.use('/', stockRoutes);
+app.use('/', orderRoutes);
 
-// Initialize AI features
-aiModule.initAI(app, mysqlConnection);
+// Root route - redirect to login
+app.get('/', (req, res) => {
+  res.redirect('/login');
+});
 
+// 404 handler
+app.use((req, res) => {
+  res.status(404).render('404.ejs');
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).render('error.ejs', { error: err });
+});
+
+// Export app and database connection
 module.exports = { app, mysqlConnection };
