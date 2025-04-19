@@ -4,6 +4,7 @@ const flash = require('express-flash');
 const session = require('express-session');
 const methodOverride = require('method-override');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
 const helmet = require('helmet');
 const { check, validationResult } = require('express-validator');
@@ -49,6 +50,7 @@ app.set('view engine', 'ejs');
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 // Security middleware
 app.use(helmet(helmetConfig));
