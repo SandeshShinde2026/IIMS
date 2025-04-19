@@ -5,10 +5,10 @@ const rateLimit = require('express-rate-limit');
 // Setup CSRF protection
 const csrfProtection = csrf({ cookie: true });
 
-// Setup rate limiting for login attempts
+// Setup rate limiting for login attempts (disabled to allow unlimited login attempts)
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 5 login attempts per windowMs
+  max: 1000, // Set to a very high number to effectively disable rate limiting
   message: 'Too many login attempts from this IP, please try again after 15 minutes',
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers

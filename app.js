@@ -54,7 +54,7 @@ app.use(cookieParser());
 
 // Security middleware
 app.use(helmet(helmetConfig));
-app.use('/login', loginLimiter);
+// Login rate limiter removed to allow unlimited login attempts
 app.use('/api', apiSecurityHeaders);
 
 // Session configuration
