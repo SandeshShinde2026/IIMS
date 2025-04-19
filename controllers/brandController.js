@@ -4,7 +4,7 @@ const Brand = require('../models/Brand');
 exports.getAllBrands = async (req, res) => {
   try {
     const brands = await Brand.getAll();
-    res.render('brands.ejs', { brands });
+    res.render('brands.ejs', { brand: brands });
   } catch (err) {
     console.error('Error fetching brands:', err);
     req.flash('error', 'Failed to fetch brands');
@@ -16,15 +16,15 @@ exports.getAllBrands = async (req, res) => {
 exports.addBrand = async (req, res) => {
   try {
     const { new: brandName } = req.body;
-    
+
     if (!brandName) {
       req.flash('error', 'Brand name is required');
       return res.redirect('/brands');
     }
-    
+
     const brand = new Brand(brandName);
     await brand.save();
-    
+
     req.flash('success', 'Brand added successfully');
     res.redirect('/brands');
   } catch (err) {
@@ -38,14 +38,14 @@ exports.addBrand = async (req, res) => {
 exports.deleteBrand = async (req, res) => {
   try {
     const { deleteid } = req.body;
-    
+
     if (!deleteid) {
       req.flash('error', 'Brand ID is required');
       return res.redirect('/brands');
     }
-    
+
     await Brand.delete(deleteid);
-    
+
     req.flash('success', 'Brand deleted successfully');
     res.redirect('/brands');
   } catch (err) {

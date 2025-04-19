@@ -10,7 +10,7 @@ exports.getAllStocks = async (req, res) => {
     const categories = await Category.getAll();
     const brands = await Brand.getAll();
     const sizes = await Size.getAll();
-    
+
     res.render('stocks.ejs', {
       category: categories,
       brand: brands,
@@ -27,7 +27,16 @@ exports.getAllStocks = async (req, res) => {
 exports.viewStocks = async (req, res) => {
   try {
     const stocks = await Stock.getAll();
-    res.render('viewstocks.ejs', { stocks });
+    const brands = await Brand.getAll();
+    const categories = await Category.getAll();
+    const sizes = await Size.getAll();
+
+    res.render('viewstocks.ejs', {
+      stocks,
+      brands,
+      categories,
+      sizes
+    });
   } catch (err) {
     console.error('Error fetching stocks:', err);
     req.flash('error', 'Failed to fetch stocks');
@@ -46,18 +55,18 @@ exports.addStock = async (req, res) => {
       size,
       amount
     } = req.body;
-    
+
     // Validate input
     if (!itemid || !itemname || !category || !brand || !size || !amount) {
       req.flash('error', 'All fields are required');
       return res.redirect('/stocks');
     }
-    
+
     // Create date and time
     const now = new Date();
     const stockDate = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`;
     const stockTime = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
-    
+
     const stockData = {
       itemId: itemid,
       itemName: itemname,
@@ -71,10 +80,10 @@ exports.addStock = async (req, res) => {
       tMonth: now.getMonth() + 1,
       tYear: now.getFullYear()
     };
-    
+
     const stock = new Stock(stockData);
     await stock.save();
-    
+
     req.flash('success', 'Stock added successfully');
     res.redirect('/viewstocks');
   } catch (err) {
@@ -88,14 +97,14 @@ exports.addStock = async (req, res) => {
 exports.deleteStock = async (req, res) => {
   try {
     const { deleteid } = req.body;
-    
+
     if (!deleteid) {
       req.flash('error', 'Stock ID is required');
       return res.redirect('/viewstocks');
     }
-    
+
     await Stock.delete(deleteid);
-    
+
     req.flash('success', 'Stock deleted successfully');
     res.redirect('/viewstocks');
   } catch (err) {
@@ -109,11 +118,11 @@ exports.deleteStock = async (req, res) => {
 exports.filterStocks = async (req, res) => {
   try {
     const { exampleRadios1: filterType } = req.body;
-    
+
     if (filterType === 'brand') {
       const brandStats = await Stock.getStatsByBrand();
       const totalItems = await Stock.getTotalCount();
-      
+
       res.render('stock_filter.ejs', {
         filter_type: filterType,
         display_content: brandStats,
@@ -122,7 +131,7 @@ exports.filterStocks = async (req, res) => {
     } else if (filterType === 'category') {
       const categoryStats = await Stock.getStatsByCategory();
       const totalItems = await Stock.getTotalCount();
-      
+
       res.render('stock_filter.ejs', {
         filter_type: filterType,
         display_content: categoryStats,
