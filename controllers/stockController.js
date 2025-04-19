@@ -35,7 +35,8 @@ exports.viewStocks = async (req, res) => {
       stocks,
       brands,
       categories,
-      sizes
+      sizes,
+      filter_type: 'None'
     });
   } catch (err) {
     console.error('Error fetching stocks:', err);

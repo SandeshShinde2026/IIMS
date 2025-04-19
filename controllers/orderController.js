@@ -38,7 +38,8 @@ exports.getAllOrders = async (req, res) => {
       is_filter_applied: false,
       selected_item: null,
       month_name: null,
-      year: null
+      year: null,
+      display_content: []
     });
   } catch (err) {
     console.error('Error fetching orders:', err);
@@ -54,7 +55,7 @@ exports.submitBill = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       req.flash('error', errors.array().map(err => err.msg).join(', '));
-      return res.redirect('/billing');
+      return res.redirect('/bill');
     }
 
     const {
@@ -68,7 +69,7 @@ exports.submitBill = async (req, res) => {
 
     if (itemKeys.length === 0) {
       req.flash('error', 'At least one item is required');
-      return res.redirect('/billing');
+      return res.redirect('/bill');
     }
 
     // Create transaction ID
@@ -91,7 +92,7 @@ exports.submitBill = async (req, res) => {
 
       if (!stockItem) {
         req.flash('error', `Item with ID ${itemId} not found`);
-        return res.redirect('/billing');
+        return res.redirect('/bill');
       }
 
       // Create order data
@@ -124,7 +125,7 @@ exports.submitBill = async (req, res) => {
   } catch (err) {
     console.error('Error submitting order:', err);
     req.flash('error', 'Failed to submit order');
-    res.redirect('/billing');
+    res.redirect('/bill');
   }
 };
 
@@ -309,7 +310,7 @@ exports.showBilling = async (req, res) => {
     const brands = await Brand.getAll();
     const sizes = await Size.getAll();
 
-    res.render('billing.ejs', {
+    res.render('bill.ejs', {
       category: categories,
       brand: brands,
       size: sizes

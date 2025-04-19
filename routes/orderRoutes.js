@@ -10,8 +10,8 @@ router.post('/orders', checkAuthenticated, orderController.filterOrders);
 router.post('/deleteorder', checkAuthenticated, orderController.deleteOrder);
 
 // Billing routes
-router.get('/billing', checkAuthenticated, orderController.showBilling);
-router.post('/billing', checkAuthenticated, [
+router.get('/bill', checkAuthenticated, orderController.showBilling);
+router.post('/bill', checkAuthenticated, [
   check('customernumber')
     .trim()
     .notEmpty().withMessage('Customer number is required')
