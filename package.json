@@ -12,6 +12,7 @@
     "@copilotkit/backend": "^0.37.0",
     "@copilotkit/react-core": "^1.6.0",
     "@copilotkit/react-ui": "^1.6.0",
+    "@google/generative-ai": "^0.24.0",
     "@tensorflow/tfjs": "3.18.0",
     "@tensorflow/tfjs-node": "3.18.0",
     "bcrypt": "^5.0.1",
