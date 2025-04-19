@@ -53,6 +53,19 @@ if (process.env.NODE_ENV !== 'production') {
   // Apply rate limiting to login route
   app.use('/login', loginLimiter);
 
+  // Add security headers to all API routes
+  app.use('/api', (req, res, next) => {
+    // Set security headers for API routes
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('Surrogate-Control', 'no-store');
+    next();
+  });
+
   const users = []
 
     users.push({
